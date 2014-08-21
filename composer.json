@@ -13,6 +13,7 @@
     "autoload": {
         "psr-0": {
             "Omashu\\Message": "src/"
-        }
+        },
+        "classmap": ["src/"]
     }
 }
