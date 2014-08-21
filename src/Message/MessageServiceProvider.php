@@ -8,7 +8,7 @@ class MessageServiceProvider extends ServiceProvider {
 	public function register()
 	{
 		$this->app->singleton('message', function() {
-			return new Factory();
+			return new Manager();
 		});
 	}
 }

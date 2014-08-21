@@ -6,4 +6,5 @@ class Message {
 	protected $message = NULL;
 	protected $type = NULL;
 	protected $tags = array();
+	protected $priority = 100;
 }
