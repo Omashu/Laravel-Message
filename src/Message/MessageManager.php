@@ -1,6 +1,8 @@
 <?php namespace Omashu\Message;
 
 use Illuminate\View\Factory as ViewFactory;
+use Illuminate\Session\SessionManager;
+use Illuminate\Validation\Validator;
 
 /**
  * Message manager
@@ -15,16 +17,42 @@ class Manager {
 	protected $view;
 
 	/**
+	 * The view factory instance.
+	 *
+	 * @var \Illuminate\Session\SessionManager
+	 */
+	protected $session;
+
+	/**
+	 * Session name
+	 */
+	protected $sessionName = "messages";
+
+	/**
 	 * All messages
 	 * 
 	 * @var array
 	 */
 	protected $messages = array();
 
-	public function __construct(ViewFactory $view)
+	/**
+	 * Constructor (singleton)
+	 */
+	public function __construct(ViewFactory $view, SessionManager $session)
 	{
 		$this->view = $view;
+		$this->session = $session;
 		$this->view->addNamespace('message', __DIR__.'/views');
+		$this->messages = $this->session->get($this->sessionName, array());
+	}
+
+	/**
+	 * Get session name, where the messages are stored
+	 * @return string
+	 */
+	public function getSessionName()
+	{
+		return $this->sessionName;
 	}
 
 	/**
@@ -36,6 +64,23 @@ class Manager {
 	 */
 	public function create($message = null, $type = null)
 	{
+		if ($message instanceof Validator)
+		{
+			$messages = array();
+			foreach ($message->messages()->getMessages() as $field => $values)
+			{
+				foreach ($values as $str)
+				{
+					$object = $this->create($str, $type);
+					$object->appendTag($field);
+
+					$messages[] = $object;
+				}
+			}
+
+			return $messages;
+		}
+
 		$object = new Message();
 		$object->setMessage($message);
 		$object->setType($type);
@@ -72,32 +117,32 @@ class Manager {
 		return $this->_get($this->messages, $group, $sort);
 	}
 
-	public function getSuccess($sort = true)
+	public function getSuccess($group = true, $sort = true)
 	{
-		return $this->_get($this->_getByType("success"), false, $sort);
+		return $this->_get($this->_getByType("success"), $group, $sort);
 	}
 
-	public function getInfo($sort = true)
+	public function getInfo($group = true, $sort = true)
 	{
-		return $this->_get($this->_getByType("info"), false, $sort);
+		return $this->_get($this->_getByType("info"), $group, $sort);
 	}
 
-	public function getDanger($sort = true)
+	public function getDanger($group = true, $sort = true)
 	{
-		return $this->_get($this->_getByType("danger"), false, $sort);
+		return $this->_get($this->_getByType("danger"), $group, $sort);
 	}
 
-	public function getWarning($sort = true)
+	public function getWarning($group = true, $sort = true)
 	{
-		return $this->_get($this->_getByType("warning"), false, $sort);
+		return $this->_get($this->_getByType("warning"), $group, $sort);
 	}
 
-	public function getView($viewName = null, array $messages = null)
+	public function getView($viewName = null, MessageResponse $response = null)
 	{
 		$viewName = is_null($viewName) ? "message::message" : $viewName;
-		$messages = is_null($messages) ? $this->get() : $messages;
+		$response = is_null($response) ? $this->get() : $response;
 
-		return $this->view->make($viewName, array("messages" => $messages));
+		return $this->view->make($viewName, array("result" => $response));
 	}
 
 	/*** HELPERS ***/
