@@ -12,7 +12,7 @@ Use composer:
 	"repositories": [
 		{
 			"type": "git",
-			"url": "https://github.com/Omashu/Message"
+			"url": "https://github.com/Omashu/Laravel-Message"
 		}
 	],
 	"require": {
