@@ -34,7 +34,7 @@ class Manager {
 	 * @param string $type
 	 * @return Omashu\Message\Message
 	 */
-	public function create($message = NULL, $type = NULL)
+	public function create($message = null, $type = null)
 	{
 		$object = new Message();
 		$object->setMessage($message);
@@ -67,39 +67,45 @@ class Manager {
 	}
 
 	/*** GETTERS ***/
-	public function get($group = TRUE, $sort = TRUE)
+	public function get($group = true, $sort = true)
 	{
 		return $this->_get($this->messages, $group, $sort);
 	}
 
-	public function getSuccess($sort = TRUE)
+	public function getSuccess($sort = true)
 	{
-		return $this->_get($this->_getByType("success"), FALSE, $sort);
+		return $this->_get($this->_getByType("success"), false, $sort);
 	}
 
-	public function getInfo($sort = TRUE)
+	public function getInfo($sort = true)
 	{
-		return $this->_get($this->_getByType("info"), FALSE, $sort);
+		return $this->_get($this->_getByType("info"), false, $sort);
 	}
 
-	public function getDanger($sort = TRUE)
+	public function getDanger($sort = true)
 	{
-		return $this->_get($this->_getByType("danger"), FALSE, $sort);
+		return $this->_get($this->_getByType("danger"), false, $sort);
 	}
 
-	public function getWarning($sort = TRUE)
+	public function getWarning($sort = true)
 	{
-		return $this->_get($this->_getByType("warning"), FALSE, $sort);
+		return $this->_get($this->_getByType("warning"), false, $sort);
 	}
 
-	public function render()
+	public function getView($viewName = null, array $messages = null)
 	{
-		return $this->view->make("message", array("messages" => $this->get()));
+		$viewName = is_null($viewName) ? "message::message" : $viewName;
+		$messages = is_null($messages) ? $this->get() : $messages;
+
+		return $this->view->make($viewName, array("messages" => $messages));
 	}
 
 	/*** HELPERS ***/
-	protected function _get(array $messages, $group = TRUE, $sort = TRUE)
+	protected function _get(array $messages, $group = true, $sort = true)
 	{
+		$group = (bool) $group;
+		$sort = (bool) $sort;
+
 		if (!$group AND !$sort)
 		{
 			return $messages;
@@ -132,13 +138,13 @@ class Manager {
 			ksort($results);
 		} else if ($sort AND $group)
 		{
-			foreach ($results as $group => $values)
+			foreach ($results as $type => $values)
 			{
-				ksort($results[$group]);
+				ksort($results[$type]);
 			}
 		}
 
-		return $results;
+		return new MessageResponse($results, $group, $sort);
 	}
 
 	protected function _getByType($type)

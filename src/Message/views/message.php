@@ -1,1 +1,1 @@
-message.php
+<?php var_dump($messages) ?>
