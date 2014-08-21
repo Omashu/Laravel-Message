@@ -17,7 +17,7 @@ class Manager {
 	protected $view;
 
 	/**
-	 * The view factory instance.
+	 * The session manager instance.
 	 *
 	 * @var \Illuminate\Session\SessionManager
 	 */
@@ -41,8 +41,9 @@ class Manager {
 	public function __construct(ViewFactory $view, SessionManager $session)
 	{
 		$this->view = $view;
-		$this->session = $session;
 		$this->view->addNamespace('message', __DIR__.'/views');
+
+		$this->session = $session;
 		$this->messages = $this->session->get($this->sessionName, array());
 	}
 
@@ -145,6 +146,11 @@ class Manager {
 		return $this->view->make($viewName, array("result" => $response));
 	}
 
+	public function getMessages()
+	{
+		return $this->messages;
+	}
+
 	/*** HELPERS ***/
 	protected function _get(array $messages, $group = true, $sort = true)
 	{
@@ -153,7 +159,7 @@ class Manager {
 
 		if (!$group AND !$sort)
 		{
-			return $messages;
+			return new MessageResponse($messages);
 		}
 
 		$results = array();

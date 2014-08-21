@@ -11,7 +11,7 @@ class MessageServiceProvider extends ServiceProvider {
 			return new Manager($app['view'], $app['session']);
 		});
 		$this->app->resolving('redirect', function($redirector, $app) {
-			$app['session']->flash($app['message']->getSessionName(), $app['message']->get(false,false));
+			$app['session']->flash($app['message']->getSessionName(), $app['message']->getMessages());
 		});
 	}
 }
