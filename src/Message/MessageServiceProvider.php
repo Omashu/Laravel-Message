@@ -7,8 +7,8 @@ use Illuminate\Support\ServiceProvider;
 class MessageServiceProvider extends ServiceProvider {
 	public function register()
 	{
-		$this->app->singleton('message', function() {
-			return new Manager();
+		$this->app->singleton('message', function($app) {
+			return new Manager($app['view']);
 		});
 	}
 }
